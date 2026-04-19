@@ -1,0 +1,18 @@
+Course
+Tabela: Courses
+PK: ID
+Regras: Title obrigatório, Categoria obrigatória
+Índices: Category
+
+
+Student 
+Tabela: Students
+PK: ID
+FK: UserID é a IdentityUser.id
+Regras: Email único
+
+ENROLLMENT
+Tabela: Enrollments
+PK: Id
+FK: StudentID, CourseID
+Regra: Não duplicar matrícula
