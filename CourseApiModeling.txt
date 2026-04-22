@@ -14,5 +14,5 @@ Regras: Email único
 ENROLLMENT
 Tabela: Enrollments
 PK: Id
-FK: StudentID, CourseID
+FK: StudentId, CourseId
 Regra: Não duplicar matrícula

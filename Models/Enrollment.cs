@@ -1,16 +1,14 @@
-﻿using System;
-
-public class Enrollment
+﻿public class Enrollment
 {
-	public Guid ID { get; set; }
+    public Guid Id { get; set; }
 
-	public Guid StudentID { get; set; }
-	public Student Student { get; set; } = null!;
+    public Guid StudentId { get; set; }
+    public Student Student { get; set; } = null!;
 
-	public Guid CourseID { get; set; }
-	public Course Course { get; set; } = null!;
+    public Guid CourseId { get; set; }
+    public Course Course { get; set; } = null!;
 
-	public EnrollmentStatus Status { get; set; }
-	public DateTime EnrolledAt { get; set; } = DateTime.UtcNow;
+    public EnrollmentStatus Status { get; set; }
 
+    public DateTime EnrolledAt { get; set; } = DateTime.UtcNow;
 }

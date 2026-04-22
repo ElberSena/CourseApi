@@ -1,14 +1,18 @@
-﻿using System;
-
-public class Course
+﻿public class Course
 {
-	public Guid ID { get; set; }
-	public string Title { get; set; } = null!;
-	public string Description { get; set; }
-	public string Category { get; set; } = null!;
-    public string Workload { get; set; }
-	public DateTime	CreatedAt { get; set; } = Datetime.UtcNow;
-	public bool Isdelete { get; set; };
+    public Guid Id { get; set; }
 
-	public ICollecin<Enrollment> Enrollments { get; set; } + new List<Enrollment>();
+    public string Title { get; set; } = null!;
+
+    public string? Description { get; set; }
+
+    public string Category { get; set; } = null!;
+
+    public int WorkloadHours { get; set; }  
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public bool IsDeleted { get; set; }
+
+    public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
 }
