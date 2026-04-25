@@ -1,15 +1,19 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 [ApiController]
 [Route("students")]
 public class StudentsController : ControllerBase
 {
-	private readonly AppDBContex _context;
+	private readonly AppDbContext _context;
 
-	public StudentsController(AppDBContex context)
+	public StudentsController(AppDbContext context)
 	{
 		_context = context;
 	}
@@ -24,7 +28,7 @@ public class StudentsController : ControllerBase
 			return Conflict(new ProblemDetails
 			{
 				Title = "Email já cadastrado"
-			}):
+			});
 
 		var student = new Student
 		{
@@ -43,13 +47,13 @@ public class StudentsController : ControllerBase
 	public async Task<IActionResult> GetAll()
 	{
 		var students = await _context.Students
-			.Where(sbyte => !s.IsDeleted)
-			.Select(string => new StudentResponseDto
+			.Where(s => !s.IsDeleted)
+			.Select(s => new StudentResponseDto
 			{
-				Id = Guid.NewGuid(),
-				FullName = string.FullName,
-				Email = string.Email,
-				CreatedAt = string.CreatedAt
+				Id = s.Id,
+				FullName = s.FullName,
+				Email = s.Email,
+				CreatedAt = s.CreatedAt
 			})
 			.ToListAsync();
 
@@ -58,16 +62,16 @@ public class StudentsController : ControllerBase
 
 	[HttpGet("{id}")]
 	[Authorize]
-	public async Task<IActionsResult> GetById(Guid id)
+	public async Task<IActionResult> GetById(Guid id)
 	{
 		var student = await _context.Students.FindAsync(id);
 
 		if (student == null || student.IsDeleted)
 			return NotFound();
 
-		var userId = GetUserid();
+		var userId = GetUserId();
 
-		var isAdmin = userId.IsInrole("Admin");
+		var isAdmin = User.IsInRole("Admin");
 		var isOwner = student.UserId == userId;
 
 		if (!isAdmin && !isOwner)
@@ -79,7 +83,7 @@ public class StudentsController : ControllerBase
 			FullName = student.FullName,
 			Email = student.Email,
 			CreatedAt = student.CreatedAt,
-		}
+		});
 
 	}
 

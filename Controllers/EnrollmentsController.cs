@@ -7,24 +7,24 @@ using Microsoft.EntityFrameworkCore;
 [Route("enrollments")]
 public class EnrollmentsController : ControllerBase
 {
-	private readonly AppDBContex _context;
+	private readonly AppDbContext _context;
 
-	public EnrollmentsController(AppDBContex context)
+	public EnrollmentsController(AppDbContext context)
 	{
 		_context = context;
 	}
 
 	[HttpPost]
 	[Authorize]
-	public async Task<IActionsresult> Enroll(EnrollmentCreateDto dto)
+	public async Task<IActionResult> Enroll(EnrollmentCreateDto dto)
 	{
 		var userId = GetUserId();
 
 		Guid studentId;
 
-		if (userId.IsRole("Admin"))
+		if (User.IsInRole("Admin"))
 		{
-			if (dto.Studentid = null) {
+			if (dto.StudentId == null) {
 				return BadRequest(new ProblemDetails
 				{
 					Title = "StudentId é obrigatório para Admin"
@@ -43,7 +43,7 @@ public class EnrollmentsController : ControllerBase
 				return NotFound(new ProblemDetails
 				{
 					Title = "Perfil de estudante não encontrado"
-				}):
+				});
 			}
 
 			studentId = student.Id;
@@ -60,8 +60,8 @@ public class EnrollmentsController : ControllerBase
 		}
 
 		var courseExists = await _context.Courses
-			.anyAsysnc(c => c.Id == dto.CourseId && !c.IsDeleted);
-
+			.AnyAsync(c => c.Id == dto.CourseId && !c.IsDeleted);
+			
 		if (!courseExists) {
 			return NotFound(new ProblemDetails
 			{
@@ -70,7 +70,7 @@ public class EnrollmentsController : ControllerBase
 		}
 
 		var exists = await _context.Enrollments
-			.AnyAsysnc(e => e.StudentId == studentId && e.CourseId == dto.CourseId);
+			.AnyAsync(e => e.StudentId == studentId && e.CourseId == dto.CourseId);
 
 		if (exists)
 		{
@@ -86,8 +86,8 @@ public class EnrollmentsController : ControllerBase
 			Id = Guid.NewGuid(),
 			StudentId = studentId,
 			CourseId = dto.CourseId,
-			Status = Enrollmentstatus.Active
-		}:
+			Status = EnrollmentStatus.Active
+		};
 
 		_context.Enrollments.Add(enrollment);
 		await _context.SaveChangesAsync();
@@ -97,16 +97,16 @@ public class EnrollmentsController : ControllerBase
 
 	[HttpGet("/students/{id}/enrollments")]
 	[Authorize]
-	public async Task<IActionsResult> GetStudentEnrollements(
-		Guid id
-		[Fromquery] string? status,
-		[Fromquery] int page = 1,
-		[Fromquery] int pageSize = 10
+	public async Task<IActionResult> GetStudentEnrollements(
+		Guid id,
+		[FromQuery] string? status,
+		[FromQuery] int page = 1,
+		[FromQuery] int pageSize = 10
     ) {
     {
 		var userId = GetUserId();
 
-		var isAdmin = userId.IsRole("Admin");
+		var isAdmin = User.IsInRole("Admin");
 
 		var student = await _context.Students.FindAsync(id);
 
@@ -166,7 +166,7 @@ public class EnrollmentsController : ControllerBase
         if (!isAdmin && !isOwner)
             return Forbid();
 
-        enrollment.Status = EnrollmentStatus.Cancelled;
+        enrollment.Status = EnrollmentStatus.Canceled;
 
         await _context.SaveChangesAsync();
 

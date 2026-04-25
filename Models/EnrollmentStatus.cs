@@ -2,6 +2,6 @@
 
 public enum EnrollmentStatus
 {
-	Ative = 1,
+	Active = 1,
 	Canceled = 2,
 }
