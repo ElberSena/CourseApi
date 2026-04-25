@@ -50,16 +50,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-using(var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await DbSeeder.SeedAsync(services);
-}
-
 // Controllers
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await DbSeeder.SeedAsync(services);
+}
 
 // Swagger
 if (app.Environment.IsDevelopment())
