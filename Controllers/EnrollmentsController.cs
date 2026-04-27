@@ -65,7 +65,8 @@ public class EnrollmentsController : ControllerBase
 		if (!courseExists) {
 			return NotFound(new ProblemDetails
 			{
-				Title = "Curso não encontrado"
+				Title = "Curso não encontrado",
+				Status = 422
 			});
 		}
 
@@ -76,7 +77,8 @@ public class EnrollmentsController : ControllerBase
 		{
 			return Conflict(new ProblemDetails
 			{
-				Title = "Estudante já matriculado neste curso"
+				Title = "Estudante já matriculado neste curso",
+				Status = 409
 
 			});
 		}
