@@ -5,17 +5,51 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Course API",
+        Version = "v1",
+        Description = "API para gerenciamento de cursos, estudantes e matrículas."
+    });
 
-// DbContext 
+    // JWT
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Digite: Bearer {seu_token}"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+// DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
-
 
 // Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -31,8 +65,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // JWT
-var key = builder.Configuration["Jwt:Key"] ?? throw new Exception("JWT Key not configured");
-
+var key = builder.Configuration["Jwt:Key"]
+    ?? throw new Exception("JWT Key not configured");
+Console.WriteLine("JWT KEY: " + builder.Configuration["Jwt:Key"]);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -47,7 +82,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
 
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(key!)
+                Encoding.UTF8.GetBytes(key)
             )
         };
     });
@@ -55,25 +90,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Controllers
 builder.Services.AddControllers();
 
-//FluentValidation
+// FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CourseCreateValidator>();
 
 var app = builder.Build();
 
+// Middleware global de erro
 app.UseMiddleware<ErrorMiddleware>();
+
+// Seed
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+
+    var db = services.GetRequiredService<AppDbContext>();
+
+
+    db.Database.Migrate();
+
     await DbSeeder.SeedAsync(services);
 }
 
 // Swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 
 app.UseHttpsRedirection();
@@ -81,6 +123,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers(); 
+app.MapControllers();
 
 app.Run();

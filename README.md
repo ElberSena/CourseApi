@@ -1,139 +1,107 @@
-# CourseApi
+# 📚 Course API
 
-## Endpoints da API
+API RESTful para gerenciamento de cursos, estudantes e matrículas.
 
-### Autenticação
+---
 
-#### Registrar usuário
+## 🚀 Tecnologias
 
-POST /auth/register
+* .NET 8
+* ASP.NET Core Web API
+* Entity Framework Core
+* SQLite
+* ASP.NET Identity
+* JWT Authentication
+* Swagger
 
-Body:
+---
 
-```json
-{
-  "email": "user@email.com",
-  "password": "123456"
-}
+## ▶ Como rodar
+
+```bash
+dotnet build
+dotnet ef database update
+dotnet run
 ```
 
-Resposta:
+Acesse:
 
-* 200 OK → usuário criado
-* 400 Bad Request → erro de validação
-
----
-
-#### Login
-
-POST /auth/login
-
-Body:
-
-```json
-{
-  "email": "user@email.com",
-  "password": "123456"
-}
-```
-
-Resposta:
-
-```json
-{
-  "token": "JWT_TOKEN_AQUI"
-}
-```
+[https://localhost:xxxx/swagger](https://localhost:xxxx/swagger)
 
 ---
 
-### Cursos
+## 🔐 Autenticação
 
-#### Listar cursos
+1. Faça login em:
+   POST /auth/login
 
-GET /courses
-
-Query params:
-
-* pageNumber
-* pageSize
-* category (opcional)
-
----
-
-#### Criar curso (Admin/Instructor)
-
-POST /courses
-
-Headers:
-Authorization: Bearer {token}
-
-Body:
-
-```json
-{
-  "title": "Curso de C#",
-  "description": "Aprenda C#",
-  "category": "Programação",
-  "workloadHours": 40
-}
-```
-
----
-
-#### Atualizar curso
-
-PUT /courses/{id}
-
----
-
-#### Remover curso (Admin)
-DELETE /courses/{id}
-
----
-
-### Estudantes
-
-####Criar estudante (Admin)
-
-POST /students
-
----
-
-#### Listar estudantes (Admin)
-
-GET /students
-
----
-
-#### Atualizar estudante
-
-PUT /students/{id}
-
----
-
-### Matrículas
-
-#### Matricular em curso
-
-POST /enrollments
-
----
-
-#### Listar minhas matrículas
-
-GET /enrollments/me
-
----
-
-## Autenticação
-
-A API utiliza JWT Bearer Token.
-
-Para acessar endpoints protegidos:
-
-1. Faça login em /auth/login
 2. Copie o token retornado
-3. Envie no header:
 
-Authorization: Bearer SEU_TOKEN
+3. No Swagger:
+   Clique em "Authorize"
+
+Digite:
+Bearer SEU_TOKEN
+
+---
+
+## 📡 Endpoints principais
+
+### Courses
+
+* GET /courses → público (com paginação/filtro)
+* POST /courses → Admin/Instructor
+* PUT /courses/{id} → Admin/Instructor
+* DELETE /courses/{id} → Admin
+
+---
+
+### Students
+
+* GET /students → Admin
+* GET /students/{id} → Admin ou dono
+* GET /me → usuário autenticado
+* POST /students → Admin
+
+---
+
+### Enrollments
+
+* POST /enrollments → autenticado
+* GET /students/{id}/enrollments → Admin ou dono
+* DELETE /enrollments/{id} → cancelar
+
+---
+
+## 📊 Paginação
+
+Exemplo:
+
+GET /courses?page=1&pageSize=10
+
+---
+
+## ⚠️ Erros
+
+A API retorna erros no padrão ProblemDetails:
+
+```json
+{
+  "title": "Curso não encontrado",
+  "status": 404
+}
+```
+
+---
+
+## 🔑 Roles
+
+* Admin
+* Instructor
+* Student
+
+---
+
+## 🧪 Testes
+
+Use Swagger ou Postman.
